@@ -11,6 +11,7 @@ A production-ready REST API built with Express, TypeScript, Prisma, and PostgreS
 - **ORM** — Prisma 7
 - **Validation** — Zod
 - **Auth** — JWT + bcrypt
+- **Email** — Nodemailer (order confirmation)
 - **File Upload** — Multer (images: jpeg, png, webp, max 5MB)
 - **Testing** — Vitest + Supertest
 - **Formatting** — Prettier
@@ -50,6 +51,13 @@ Create a `.env` file in the root:
 ```bash
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ecommerce"
 JWT_SECRET="your-super-secret-key"
+
+# SMTP (order confirmation emails)
+SMTP_HOST="smtp.example.com"
+SMTP_PORT="587"
+SMTP_USER="user@example.com"
+SMTP_PASS="your-smtp-password"
+SMTP_FROM="no-reply@example.com"
 ```
 
 ## Scripts
@@ -108,6 +116,18 @@ Query params for `GET /products`:
 | `categoryId` | number | filter by category           |
 | `search`     | string | search by product name       |
 
+### Orders (customer: own orders, admin: all)
+
+```
+POST   /orders              create order → sends confirmation email
+GET    /orders/me           list my orders
+GET    /orders/me/:id       get my order by id
+GET    /orders              list all orders (admin, paginated)
+PUT    /orders/:id/status   update status (admin)
+```
+
+Valid statuses: `PENDING`, `SHIPPED`, `DELIVERED`, `CANCELLED`
+
 ### Health
 
 ```
@@ -158,6 +178,7 @@ ecommerce-api/
 │   ├── generated/
 │   │   └── prisma/
 │   ├── lib/
+│   │   ├── mailer.ts
 │   │   ├── prisma.ts
 │   │   └── upload.ts
 │   ├── middlewares/
@@ -167,21 +188,28 @@ ecommerce-api/
 │   ├── routes/
 │   │   ├── auth.ts
 │   │   ├── categories.ts
+│   │   ├── orders.ts
 │   │   ├── products.ts
 │   │   └── users.ts
 │   ├── schemas/
 │   │   ├── category.schema.ts
+│   │   ├── order.schema.ts
 │   │   ├── product.schema.ts
 │   │   └── user.schema.ts
 │   ├── services/
 │   │   ├── category.service.ts
+│   │   ├── email.service.ts
+│   │   ├── order.service.ts
 │   │   ├── product.service.ts
 │   │   └── user.service.ts
 │   ├── index.ts
 │   └── server.ts
 ├── uploads/
 ├── tests/
-│   └── auth.test.ts
+│   ├── auth.test.ts
+│   ├── categories.test.ts
+│   ├── orders.test.ts
+│   └── products.test.ts
 ├── docker-compose.yml
 └── .env
 ```

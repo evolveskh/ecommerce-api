@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import request from 'supertest'
 import { app } from '../src/index.ts'
 
